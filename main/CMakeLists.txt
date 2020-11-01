@@ -3,6 +3,8 @@ set(COMPONENT_REQUIRES )
 set(COMPONENT_PRIV_REQUIRES )
 
 set(COMPONENT_SRCS "main.cpp")
-set(COMPONENT_ADD_INCLUDEDIRS "")
+set(COMPONENT_ADD_INCLUDEDIRS "" "disp")
 
+
+                    
 register_component()

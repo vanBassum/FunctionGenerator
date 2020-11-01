@@ -9,7 +9,12 @@
 #define MAIN_COMMANDS_H_
 
 #include "../components/CPP_LIB/JBVProtocol.h"
+#include "AD9850.h"
+
+extern AD9850 ad9850;
 typedef void (*Command)(JBVClient*, Frame*);
+
+
 
 void SendACK(JBVClient *client, Frame *rx)
 {
@@ -24,7 +29,19 @@ void SendNACK(JBVClient *client, Frame *rx)
 }
 
 
-
+void SetFreqLed(JBVClient *client, Frame *rx)
+{
+	if(rx->DataLength == 8)
+	{
+		double *freq = (double*)rx->Data;
+		ad9850.SetFrequency(*freq);
+		SendACK(client, rx);
+	}
+	else
+	{
+		SendNACK(client, rx);
+	}
+}
 
 
 
@@ -48,6 +65,7 @@ Command GetCMD(uint32_t i)
 	switch(i)
 	{
 	case 1: return SwitchLed;
+	case 2: return SetFreqLed;
 	default: return 0;
 	}
 

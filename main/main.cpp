@@ -12,9 +12,16 @@
 #include "../components/CPP_LIB/FreeRTOS.h"
 #include "../components/CPP_LIB/JBVProtocol.h"
 #include "Commands.h"
+#include "AD9850.h"
+
 
 TCPConnection con;
-JBVClient client(SoftwareID::DPS50xx);
+JBVClient client(SoftwareID::FunctionGenerator);
+
+AD9850 ad9850(	GPIO_NUM_26,
+				GPIO_NUM_33,
+				GPIO_NUM_25,
+				GPIO_NUM_32);
 
 
 extern "C" {
@@ -35,6 +42,15 @@ esp_err_t event_handler(void *ctx, system_event_t *event)
 	}
 
     return ESP_OK;
+}
+
+
+void InitScreen()
+{
+	//TFT_t dev;
+	//spi_master_init(&dev, CONFIG_CS_GPIO, CONFIG_DC_GPIO, CONFIG_RESET_GPIO, CONFIG_BL_GPIO);
+
+
 }
 
 
@@ -70,6 +86,21 @@ void app_main(void)
 	con.Connect("192.168.11.2", 1000, true);
 	client.SetConnection(&con);
 	client.HandleFrame = new Callback<void, JBVClient*, Frame*>(HandleFrame);
+
+
+
+
+
+
+
+
+
+
+	ad9850.SetFrequency(100);
+
+	InitScreen();
+
+
 
     while(true)
     	vTaskDelay(100 / portTICK_PERIOD_MS);
