@@ -17,8 +17,8 @@
 class AD9850
 {
 	gpio_num_t wclk;
-	gpio_num_t data;
 	gpio_num_t fqud;
+	gpio_num_t data;
 	gpio_num_t reset;
 
 
@@ -41,10 +41,9 @@ class AD9850
 
 public:
 
-
 	AD9850(	gpio_num_t pwclk,
-			gpio_num_t pdata,
 			gpio_num_t pfqud,
+			gpio_num_t pdata,
 			gpio_num_t preset)
 	{
 		ESP_LOGI("AD9850", "Init");
@@ -74,7 +73,7 @@ public:
 	{
 		uint32_t freq = frequency * 4294967295 / 125000000;
 
-		ESP_LOGI("AD9850", "Setfreq %f", frequency);
+		//ESP_LOGI("AD9850", "Setfreq %f", frequency);
 
 		vTaskSuspendAll ();
 		for(int i=0; i<4; i++, freq>>=8)

@@ -14,6 +14,7 @@ extern "C"
 }
 
 #include "Color.h"
+#include "Font.h"
 
 class TFT
 {
@@ -48,11 +49,6 @@ public:
 	}
 
 
-
-
-
-
-
 	void DrawPixel(uint16_t x, uint16_t y, Color color)
 	{
 		lcdDrawPixel( & dev, x, y, color.Get_RGB565());
@@ -78,9 +74,187 @@ public:
 		lcdDrawRect( & dev, x1, y1, x2, y2, color.Get_RGB565());
 	}
 
-	int DrawString(FontxFile *fx, uint16_t x, uint16_t y, uint8_t * ascii, Color color)
+
+	int DrawChar(Font *fxs, uint16_t x, uint16_t y, uint8_t ascii, uint16_t color)
 	{
-		return lcdDrawString( & dev, fx, x, y, ascii, color.Get_RGB565());
+		uint16_t xx,yy,bit,ofs;
+		unsigned char fonts[128]; // font pattern
+		unsigned char pw, ph;
+		int h,w;
+		uint16_t mask;
+		bool rc;
+
+		rc = fxs->GetFontx(ascii, fonts, &pw, &ph);
+		if (!rc) return 0;
+
+		uint16_t xd1 = 0;
+		uint16_t yd1 = 0;
+		uint16_t xd2 = 0;
+		uint16_t yd2 = 0;
+		uint16_t xss = 0;
+		uint16_t yss = 0;
+		uint16_t xsd = 0;
+		uint16_t ysd = 0;
+		int next = 0;
+		uint16_t x0  = 0;
+		uint16_t x1  = 0;
+		uint16_t y0  = 0;
+		uint16_t y1  = 0;
+		if (dev._font_direction == 0)
+		{
+			xd1 = +1;
+			yd1 = +1; //-1;
+			xd2 =  0;
+			yd2 =  0;
+			xss =  x;
+			yss =  y - (ph - 1);
+			xsd =  1;
+			ysd =  0;
+			next = x + pw;
+			x0  = x;
+			y0  = y - (ph-1);
+			x1  = x + (pw-1);
+			y1  = y;
+		}
+		else if (dev._font_direction == 2)
+		{
+			xd1 = -1;
+			yd1 = -1; //+1;
+			xd2 =  0;
+			yd2 =  0;
+			xss =  x;
+			yss =  y + ph + 1;
+			xsd =  1;
+			ysd =  0;
+			next = x - pw;
+			x0  = x - (pw-1);
+			y0  = y;
+			x1  = x;
+			y1  = y + (ph-1);
+		}
+		else if (dev._font_direction == 1)
+		{
+			xd1 =  0;
+			yd1 =  0;
+			xd2 = -1;
+			yd2 = +1; //-1;
+			xss =  x + ph;
+			yss =  y;
+			xsd =  0;
+			ysd =  1;
+			next = y + pw; //y - pw;
+			x0  = x;
+			y0  = y;
+			x1  = x + (ph-1);
+			y1  = y + (pw-1);
+		}
+		else if (dev._font_direction == 3)
+		{
+			xd1 =  0;
+			yd1 =  0;
+			xd2 = +1;
+			yd2 = -1; //+1;
+			xss =  x - (ph - 1);
+			yss =  y;
+			xsd =  0;
+			ysd =  1;
+			next = y - pw; //y + pw;
+			x0  = x - (ph-1);
+			y0  = y - (pw-1);
+			x1  = x;
+			y1  = y;
+		}
+
+	    if (dev._font_fill)
+	    {
+	    	lcdDrawFillRect(&dev, x0, y0, x1, y1, dev._font_fill_color);
+	    }
+
+		int bits;
+		ofs = 0;
+		yy = yss;
+		xx = xss;
+		for(h=0;h<ph;h++)
+		{
+			if(xsd)
+				xx = xss;
+			if(ysd)
+				yy = yss;
+
+			bits = pw;
+			for(w=0;w<((pw+4)/8);w++)
+			{
+				mask = 0x80;
+				for(bit=0;bit<8;bit++)
+				{
+					bits--;
+					if (bits < 0)
+						continue;
+
+					if (fonts[ofs] & mask)
+						lcdDrawPixel(&dev, xx, yy, color);
+					if (h == (ph-2) && dev._font_underline)
+						lcdDrawPixel(&dev, xx, yy, dev._font_underline_color);
+					if (h == (ph-1) && dev._font_underline)
+						lcdDrawPixel(&dev, xx, yy, dev._font_underline_color);
+					xx = xx + xd1;
+					yy = yy + yd2;
+					mask = mask >> 1;
+				}
+				ofs++;
+			}
+			yy = yy + yd1;
+			xx = xx + xd2;
+		}
+
+		if (next < 0) next = 0;
+		return next;
+	}
+
+
+
+
+	int DrawString(Font *fx, uint16_t x, uint16_t y, const char * ascii, Color color)
+	{
+		int length = strlen((char *)ascii);
+		for(int i=0;i<length;i++)
+		{
+			if (dev._font_direction == 0)
+				x = DrawChar(fx, x, y, ascii[i], color.Get_RGB565());
+			if (dev._font_direction == 1)
+				y = DrawChar( fx, x, y, ascii[i], color.Get_RGB565());
+			if (dev._font_direction == 2)
+				x = DrawChar( fx, x, y, ascii[i], color.Get_RGB565());
+			if (dev._font_direction == 3)
+				y = DrawChar( fx, x, y, ascii[i], color.Get_RGB565());
+		}
+		if (dev._font_direction == 0) return x;
+		if (dev._font_direction == 2) return x;
+		if (dev._font_direction == 1) return y;
+		if (dev._font_direction == 3) return y;
+		return 0;
+	}
+
+	int DrawString(Font *fx, uint16_t x, uint16_t y, std::string ascii, Color color)
+	{
+		return DrawString(fx, x, y, ascii.c_str(), color);
+	}
+
+	void test()
+	{
+		FontxFile fx16G[2];
+		InitFontx(fx16G,"/spiffs/ILGH16XB.FNT",""); // 8x16Dot Gothic
+	}
+
+
+	void SetFontFill(Color color)
+	{
+		lcdSetFontFill( & dev, color.Get_RGB565());
+	}
+
+	void UnsetFontFill()
+	{
+		lcdUnsetFontFill( & dev);
 	}
 
 
@@ -184,15 +358,7 @@ public:
 		lcdSetFontDirection( & dev, dir);
 	}
 
-	void SetFontFill(uint16_t color)
-	{
-		lcdSetFontFill( & dev, color);
-	}
 
-	void UnsetFontFill()
-	{
-		lcdUnsetFontFill( & dev);
-	}
 
 	void SetFontUnderLine(uint16_t color)
 	{

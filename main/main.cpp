@@ -12,20 +12,15 @@
 #include "../components/CPP_LIB/FreeRTOS.h"
 #include "../components/CPP_LIB/JBVProtocol.h"
 #include "Commands.h"
-#include "AD9850.h"
-#include "Display/TFT.h"
 
 
+#include "FunctionGenerator.h"
 
+FunctionGenerator generator;
 TCPConnection con;
 JBVClient client(SoftwareID::FunctionGenerator);
 
-AD9850 ad9850(	GPIO_NUM_26,
-				GPIO_NUM_33,
-				GPIO_NUM_25,
-				GPIO_NUM_32);
 
-TFT tft;
 
 
 
@@ -48,7 +43,6 @@ esp_err_t event_handler(void *ctx, system_event_t *event)
 
     return ESP_OK;
 }
-
 
 
 
@@ -89,39 +83,6 @@ void app_main(void)
 
 
 
-
-
-
-
-
-
-	ad9850.SetFrequency(100);
-
-	tft.Init();
-	tft.FillScreen(Color(0, 0, 0));
-
-
-
-
-
-
-    while(true)
-    {
-    	uint16_t size = 100 * 7;
-    	uint8_t rand[size];
-    	esp_fill_random(&rand, size);
-
-
-    	tft.FillScreen(Color(0, 0, 0));
-
-
-    	for(int i = 0; i<size; i+=7)
-    	{
-    		tft.DrawLine(rand[i]/2, rand[i+1]/2, rand[i+2]/2, rand[i+3]/2, Color(rand[i+4], rand[i+5], rand[i+6]));
-    	}
-
-
-    }
 }
 
 
