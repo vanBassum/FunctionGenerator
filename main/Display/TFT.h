@@ -13,6 +13,7 @@ extern "C"
 	#include "ili9340.h"
 }
 
+#include <string>
 #include "Color.h"
 #include "Font.h"
 
@@ -20,7 +21,8 @@ class TFT
 {
 	TFT_t dev;
 
-public:
+protected:
+
 	enum class Models
 	{
 		ILI9225 	= 0x9225,
@@ -31,21 +33,35 @@ public:
 		ST7796		= 0x7796,
 	};
 
-	int16_t GPIO_CS 	= 5;
-	int16_t GPIO_DC 	= 22;
-	int16_t GPIO_RESET 	= 4;
-	int16_t GPIO_BL 	= 21;
-	Models Model 		= Models::ST7735;
-	uint16_t Width		= 128;
-	uint16_t Height		= 128;
-	uint16_t Offsetx	= 2;
-	uint16_t Offsety	= 1;
+	virtual uint16_t GetWidth() = 0;
+	virtual uint16_t GetHeight() = 0;
+	virtual uint16_t GetOffsetx() = 0;
+	virtual uint16_t GetOffsety() = 0;
+	virtual Models GetModel() = 0;
 
 
-	void Init()
+public:
+
+	TFT()
 	{
-		spi_master_init(&dev, GPIO_CS, GPIO_DC, GPIO_RESET, GPIO_BL);
-		lcdInit(&dev, 0x7735, Width, Height, Offsetx, Offsety);
+
+	}
+
+	virtual ~TFT()
+	{
+
+	}
+
+	void Init(	int16_t GPIO_CS 	= 15,
+				int16_t GPIO_DC 	= 4,
+				int16_t GPIO_RESET 	= 2,
+				int16_t GPIO_BL 	= 5,
+				int16_t GPIO_MOSI 	= 16,
+				int16_t GPIO_SCK 	= 17,
+				int16_t GPIO_MISO 	= -1)
+	{
+		spi_master_init(&dev, GPIO_CS, GPIO_DC, GPIO_RESET, GPIO_BL, GPIO_SCK, GPIO_MOSI, GPIO_MISO);
+		lcdInit(&dev, (uint16_t)GetModel(), GetWidth(), GetHeight(), GetOffsetx(), GetOffsety());
 	}
 
 
@@ -396,6 +412,24 @@ public:
 	}
 
 */
+
+};
+
+
+class TFT_ILI9341 : public TFT
+{
+	TFT_t dev;
+
+protected:
+
+
+	uint16_t GetWidth() 	{ return 240; }
+	uint16_t GetHeight() 	{ return 320; }
+	uint16_t GetOffsetx() 	{ return 0; }
+	uint16_t GetOffsety() 	{ return 0; }
+	Models GetModel() 		{ return Models::ILI9341; }
+
+
 
 };
 

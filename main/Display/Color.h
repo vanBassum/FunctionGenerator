@@ -40,6 +40,10 @@ public:
 		return (((R & 0xF8) << 8) | ((G & 0xFC) << 3) | (B >> 3));
 	}
 
+
+
+
+
 	/*
 	static Color Red = Color(255, 0, 0);
 	static const Color Green = Color(0, 255, 0);

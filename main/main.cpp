@@ -9,19 +9,7 @@
 #include <string.h>
 #include "lwip/apps/sntp.h"
 #include "lwip/apps/sntp_opts.h"
-#include "../components/CPP_LIB/FreeRTOS.h"
-#include "../components/CPP_LIB/JBVProtocol.h"
-#include "Commands.h"
-
-
-#include "FunctionGenerator.h"
-
-FunctionGenerator generator;
-TCPConnection con;
-JBVClient client(SoftwareID::FunctionGenerator);
-
-
-
+#include "Display/TFT.h"
 
 
 extern "C" {
@@ -35,7 +23,6 @@ esp_err_t event_handler(void *ctx, system_event_t *event)
 	switch(event->event_id)
 	{
 	case SYSTEM_EVENT_STA_GOT_IP:
-		con.WifiConnected();
 		break;
 	default:
 		break;
@@ -72,13 +59,30 @@ void app_main(void)
 	sntp_setservername(0, "pool.ntp.org");
 	sntp_init();
 
-	gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
-	gpio_set_level(GPIO_NUM_2, 0);
 
 
-	con.Connect("192.168.11.2", 1000, true);
-	client.SetConnection(&con);
-	client.HandleFrame = new Callback<void, JBVClient*, Frame*>(HandleFrame);
+	TFT *tft = new TFT_ILI9341();
+	tft->Init();
+	tft->FillScreen(Color(0, 0, 0));
+	tft->DrawLine(110, 150, 130, 170, Color(255,0,0));
+	tft->DrawLine(130, 150, 110, 170, Color(255,0,0));
+	tft->DrawLine(0, 0, 240, 320, Color(255,0,0));
+
+	while(1)
+	{
+
+		tft->FillScreen(Color(0, 0, 0));
+		tft->DrawLine(110, 150, 130, 170, Color(255,0,0));
+		tft->DrawLine(130, 150, 110, 170, Color(255,0,0));
+		tft->DrawLine(0, 0, 240, 320, Color(255,0,0));
+		vTaskDelay(100);
+		tft->FillScreen(Color(255, 0, 0));
+		vTaskDelay(100);
+		tft->FillScreen(Color(0, 255, 0));
+		vTaskDelay(100);
+		tft->FillScreen(Color(0, 0, 255));
+		vTaskDelay(100);
+	}
 
 
 

@@ -8,7 +8,7 @@
 #ifndef MAIN_FONT_H_
 #define MAIN_FONT_H_
 
-
+#include "esp_log.h"
 #include "stdint.h"
 #include "fontx.h"
 

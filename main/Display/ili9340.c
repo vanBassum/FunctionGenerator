@@ -13,18 +13,15 @@
 #define TAG "ILI9340"
 #define	_DEBUG_ 0
 
-static const int GPIO_MOSI = 23;
-static const int GPIO_SCLK = 18;
-
 static const int SPI_Command_Mode = 0;
 static const int SPI_Data_Mode = 1;
 //static const int SPI_Frequency = SPI_MASTER_FREQ_20M;
-////static const int SPI_Frequency = SPI_MASTER_FREQ_26M;
-static const int SPI_Frequency = SPI_MASTER_FREQ_40M;
-////static const int SPI_Frequency = SPI_MASTER_FREQ_80M;
+//static const int SPI_Frequency = SPI_MASTER_FREQ_26M;
+//static const int SPI_Frequency = SPI_MASTER_FREQ_40M;
+static const int SPI_Frequency = SPI_MASTER_FREQ_80M;
 
 
-void spi_master_init(TFT_t * dev, int16_t GPIO_CS, int16_t GPIO_DC, int16_t GPIO_RESET, int16_t GPIO_BL)
+void spi_master_init(TFT_t * dev, int16_t GPIO_CS, int16_t GPIO_DC, int16_t GPIO_RESET, int16_t GPIO_BL, int16_t GPIO_SCK, int16_t GPIO_MOSI, int16_t GPIO_MISO)
 {
 	esp_err_t ret;
 
@@ -55,9 +52,9 @@ void spi_master_init(TFT_t * dev, int16_t GPIO_CS, int16_t GPIO_DC, int16_t GPIO
 	}
 
 	spi_bus_config_t buscfg = {
-		.sclk_io_num = GPIO_SCLK,
+		.sclk_io_num = GPIO_SCK,
 		.mosi_io_num = GPIO_MOSI,
-		.miso_io_num = -1,
+		.miso_io_num = GPIO_MISO,
 		.quadwp_io_num = -1,
 		.quadhd_io_num = -1
 	};
