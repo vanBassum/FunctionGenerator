@@ -1,3 +1,0 @@
-[submodule "components/cpp_lib"]
-	path = components/cpp_lib
-	url = https://github.com/vanBassum/CPP_Library.git
