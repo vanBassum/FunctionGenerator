@@ -1,15 +1,10 @@
-# Edit following two lines to set component requirements (see docs)
-set(COMPONENT_REQUIRES )
-set(COMPONENT_PRIV_REQUIRES )
+file(GLOB_RECURSE srcs *.c *.cpp)
 
-set(COMPONENT_SRCS "main.cpp" 
-					"Display/ili9340.c" 
-					"Display/decode_image.c" 
-					"Display/pngle.c" 
-					"Display/fontx.c")
-
-set(COMPONENT_ADD_INCLUDEDIRS "" "Display")
+file(GLOB_RECURSE
+    include_dirs
+    LIST_DIRECTORIES true
+    .
+)
 
 
-                    
-register_component()
+idf_component_register(SRCS ${srcs} INCLUDE_DIRS ${include_dirs})

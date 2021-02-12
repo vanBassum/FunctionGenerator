@@ -9,7 +9,14 @@
 #include <string.h>
 #include "lwip/apps/sntp.h"
 #include "lwip/apps/sntp_opts.h"
-#include "Display/TFT.h"
+#include "../components/jbvprotocol/jbvclient.h"
+#include "../components/tcpip/tcpconnection.h"
+#include "../components/tft/tft.h"
+
+#include "Commands.h"
+
+JBVClient client(SoftwareID::FunctionGenerator);
+TFT tft = TFT::Get_ILI9341();
 
 
 extern "C" {
@@ -59,29 +66,28 @@ void app_main(void)
 	sntp_setservername(0, "pool.ntp.org");
 	sntp_init();
 
+	TCPConnection con;
+	con.Connect("192.168.11.50", 32770, true);
+	client.SetConnection(&con);
+	client.HandleFrame.Bind(HandleFrame);
 
 
-	TFT *tft = new TFT_ILI9341();
-	tft->Init();
-	tft->FillScreen(Color(0, 0, 0));
-	tft->DrawLine(110, 150, 130, 170, Color(255,0,0));
-	tft->DrawLine(130, 150, 110, 170, Color(255,0,0));
-	tft->DrawLine(0, 0, 240, 320, Color(255,0,0));
+
+
+	tft.Init();
+	tft.FillScreen(Color(0, 0, 0));
+	tft.DrawLine(110, 150, 130, 170, Color(255,0,0));
+	tft.DrawLine(130, 150, 110, 170, Color(255,0,0));
+	tft.DrawLine(0, 0, 240, 320, Color(255,0,0));
+
+	float fps = 1;
+
+	int delayMs = 1000 / fps;
 
 	while(1)
 	{
 
-		tft->FillScreen(Color(0, 0, 0));
-		tft->DrawLine(110, 150, 130, 170, Color(255,0,0));
-		tft->DrawLine(130, 150, 110, 170, Color(255,0,0));
-		tft->DrawLine(0, 0, 240, 320, Color(255,0,0));
-		vTaskDelay(100);
-		tft->FillScreen(Color(255, 0, 0));
-		vTaskDelay(100);
-		tft->FillScreen(Color(0, 255, 0));
-		vTaskDelay(100);
-		tft->FillScreen(Color(0, 0, 255));
-		vTaskDelay(100);
+		vTaskDelay(delayMs / portTICK_PERIOD_MS);
 	}
 
 
